@@ -10,17 +10,12 @@ default_args = {
     'retries': 1,
 }
 
-# Define the function to load the CSV file
 def load_csv_file_prod(**kwargs):
-    # Path to the CSV file (production environment)
-    csv_file_path = '...data/traffic_data.csv'
+    csv_file_path = '...data/data.csv'
     
-    # Load the CSV file into a pandas DataFrame
     df = pd.read_csv(csv_file_path)
-    
-    # Do further processing (e.g., insert into a database)
-    # For demonstration purposes, let's print the DataFrame
-    print(df)
+ 
+    print(df.head(5))
 
 # Create the DAG
 dag = DAG(
@@ -30,7 +25,6 @@ dag = DAG(
     schedule_interval=None,  # Set to None to disable automatic scheduling
 )
 
-# Define the task to load the CSV file
 load_csv_task = PythonOperator(
     task_id='load_csv_file_task',
     python_callable=load_csv_file_prod,
