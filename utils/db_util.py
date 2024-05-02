@@ -5,6 +5,7 @@ class DBConfig:
     @staticmethod
     def load():
         load_dotenv()
+        print("hellow")
         return {
             "DATABASE_NAME": os.getenv("DB_NAME"),
             "DATABASE_USER": os.getenv("DB_USER"),
@@ -15,3 +16,4 @@ class DBConfig:
 
 # Usage:
 db_config = DBConfig.load()
+

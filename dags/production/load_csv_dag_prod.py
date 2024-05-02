@@ -2,6 +2,12 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
 import pandas as pd
+import sys
+import os
+rpath = os.path.abspath('/opt/airflow')   
+if rpath not in sys.path:
+    sys.path.insert(0, rpath) 
+from utils.db_util import DBConfig
 # Define the default arguments for the DAG
 default_args = {
     'owner': 'airflow',

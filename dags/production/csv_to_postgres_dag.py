@@ -1,67 +1,59 @@
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import datetime, timedelta
 import pandas as pd
-from sqlalchemy import create_engine
-import os,sys
-
-from dags.config import DBConfig
-
+import psycopg2
+from airflow.exceptions import AirflowException
 
 # (adjust for prod/staging/dev)
 CSV_FILE_PATH = "...data/data.csv"
 
-TARGET_TABLE = "full_traffic_data"
-
-
-def read_and_print_csv_head(**kwargs):
+def read_and_split_csv(**kwargs):
     """
-    Reads the CSV file, prints the head, and prepares data for loading.
+    Reads the CSV file and splits the data into two tables.
     """
-    import pandas as pd
-
     csv_path = CSV_FILE_PATH
 
     try:
         df = pd.read_csv(csv_path)
-        print(df.head(5)) 
 
-        #
+        # Splitting data into two dataframes
+        traffic_df = df[['track_id', 'type', 'traveled_d', 'avg_speed']]
+        trajectory_df = df[['track_id', 'lat', 'lon', 'speed', 'lon_acc', 'lat_acc', 'time']]
 
-        # kwargs['ti'] is the TaskInstance object, used to access XCom results
-        kwargs['ti'].xcom_push(key='data_to_load', value=df.to_dict(orient='records'))
+        # Convert NaNs to None
+        traffic_df = traffic_df.where(pd.notnull(traffic_df), None)
+        trajectory_df = trajectory_df.where(pd.notnull(trajectory_df), None)
+
+        # Pushing the dataframes to XCom
+        kwargs['ti'].xcom_push(key='traffic_data', value=traffic_df)
+        kwargs['ti'].xcom_push(key='trajectory_data', value=trajectory_df)
 
     except Exception as e:
         raise AirflowException(f"Error reading CSV file: {e}")
 
-
-def load_data_to_postgres(**kwargs):
+def load_data_to_postgres(table_name, **kwargs):
     """
-    Loads the prepared data (from XCom) into the Postgres table.
+    Loads the prepared data (from XCom) into the specified Postgres table.
     """
-    import psycopg2
+    db_config = {
+        'host': 'your_host',
+        'database': 'your_database',
+        'user': 'your_username',
+        'password': 'your_password',
+        'port': 'your_port'
+    }
 
-    db_config = DBConfig.load()
-
-    # Build the connection string using config values
-    connection_string = f"postgresql+psycopg2://{db_config['DATABASE_USER']}:{db_config['DATABASE_PASSWORD']}@{db_config['DATABASE_HOST']}:{db_config['DATABASE_PORT']}/{db_config['DATABASE_NAME']}"
-
-    conn = psycopg2.connect(connection_string)
-
+    conn = psycopg2.connect(**db_config)
     cur = conn.cursor()
 
-    
-    # sql = f"""
-    # INSERT INTO {TARGET_TABLE} ()
-    # VALUES ()
-    # """
-
     try:
-        data_to_load = kwargs['ti'].xcom_pull(key='data_to_load')
+        data = kwargs['ti'].xcom_pull(key=f'{table_name}_data')
 
-        for row in data_to_load:
-            cur.execute(sql, tuple(row.values()))
+        # Inserting data into the PostgreSQL table
+        for _, row in data.iterrows():
+            cur.execute(f"INSERT INTO {table_name} VALUES ({', '.join(['%s']*len(row))})", tuple(row))
 
         conn.commit()
 
@@ -72,7 +64,6 @@ def load_data_to_postgres(**kwargs):
     finally:
         cur.close()
         conn.close()
-
 
 with DAG(
     dag_id="csv_to_postgres_dag",
@@ -86,15 +77,23 @@ with DAG(
 ) as dag:
 
     read_csv_task = PythonOperator(
-        task_id="read_and_print_csv",
-        python_callable=read_and_print_csv,
+        task_id="read_and_split_csv",
+        python_callable=read_and_split_csv,
         provide_context=True,
     )
 
-    load_data_task = PythonOperator(
-        task_id="load_data_to_postgres",
+    load_traffic_data_task = PythonOperator(
+        task_id="load_traffic_data_to_postgres",
         python_callable=load_data_to_postgres,
+        op_kwargs={'table_name': 'traffic'},
         provide_context=True,
     )
 
-    read_csv_task >> load_data_task
+    load_trajectory_data_task = PythonOperator(
+        task_id="load_trajectory_data_to_postgres",
+        python_callable=load_data_to_postgres,
+        op_kwargs={'table_name': 'trajectory'},
+        provide_context=True,
+    )
+
+    read_csv_task >> [load_traffic_data_task, load_trajectory_data_task]

@@ -32,11 +32,11 @@ x-airflow-common:
     # AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     
   volumes:
-    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
-    - ${AIRFLOW_PROJ_DIR:-.}/utils:/opt/airflow/utils
-    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - /Users/missy/Desktop/python/Traffic_data_week_2/dags:/opt/airflow/dags
+    - /Users/missy/Desktop/python/Traffic_data_week_2/logs:/opt/airflow/logs
+    - /Users/missy/Desktop/python/Traffic_data_week_2/config:/opt/airflow/config
+    - /Users/missy/Desktop/python/Traffic_data_week_2/utils:/opt/airflow/utils
+    - /Users/missy/Desktop/python/Traffic_data_week_2/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
