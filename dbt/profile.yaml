@@ -1,0 +1,16 @@
+# profiles.yml
+
+my_dwh_profile:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: missy
+      password: 123456
+      port: 5432
+      dbname: Traffic
+      schema: your_schema_name
+
+
+
