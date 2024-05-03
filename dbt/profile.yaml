@@ -10,7 +10,7 @@ my_dwh_profile:
       password: 123456
       port: 5432
       dbname: Traffic
-      schema: your_schema_name
+      schema: public
 
 
 
