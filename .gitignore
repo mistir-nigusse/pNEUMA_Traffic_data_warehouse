@@ -78,6 +78,9 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+dbt/profile.yaml
+dags/production/data
+data
 folder_structure.txt
 
 # IPython

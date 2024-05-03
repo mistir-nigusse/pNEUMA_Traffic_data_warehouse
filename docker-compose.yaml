@@ -16,9 +16,10 @@ x-airflow-common:
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
-    
+    AIRFLOW__SCHEDULER__SCHEDULER_ZOMBIE_TASK_THRESHOLD: 20
+
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -36,6 +37,7 @@ x-airflow-common:
     - /Users/missy/Desktop/python/Traffic_data_week_2/logs:/opt/airflow/logs
     - /Users/missy/Desktop/python/Traffic_data_week_2/config:/opt/airflow/config
     - /Users/missy/Desktop/python/Traffic_data_week_2/utils:/opt/airflow/utils
+    - /Users/missy/Desktop/python/Traffic_data_week_2/data:/opt/airflow/data
     - /Users/missy/Desktop/python/Traffic_data_week_2/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
@@ -83,7 +85,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
-      timeout: 10s
+      timeout: 60s
       retries: 5
       start_period: 30s
     restart: always
