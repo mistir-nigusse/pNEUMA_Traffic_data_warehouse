@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: type_summary
+    description: "Shows the number of unique vehicle types along with the average of distance traveled and average speed"
+    columns:
+      - name: type
+        description: "The type of vehicle"
+        tests:
+          - unique
+          - not_null
+      - name: count
+        description: "The number of vehicles of this type"
+        tests:
+          - not_null
+      - name: avg_distance
+        description: "The average distance traveled by vehicles of this type"
+        tests:
+          - not_null
+      - name: avg_speed
+        description: "The average speed of vehicles of this type"
+        tests:
+          - not_null
+
+  - name: trajectory_speed_summary
+    description: "Shows the minimum, maximum and average speed for each track"
+    columns:
+      - name: track_id
+        description: "The ID of the track"
+        tests:
+          - unique
+          - not_null
+      - name: min_speed_recorded_for_track
+        description: "The minimum speed of vehicles in the track"
+        tests:
+          - not_null
+      - name: max_speed_recorded_for_track
+        description: "The maximum speed of vehicles in the track"
+        tests:
+          - not_null
+      - name: avg_speed_recorded_for_track
+        description: "The average speed of vehicles in the track"
+        tests:
+          - not_null
+
+  - name: fastest_vehicles_summary
+    description: "Shows vehicles where their average speed is greater than 40 km/h"
+    columns:
+      - name: track_id
+        description: "The ID of the track"
+        tests:
+          - unique
+          - not_null
+      # - name: min_speed_recorded_for_track
+      #   description: "The minimum speed of vehicles in the track"
+      #   tests:
+      #     - not_null
+      # - name: max_speed_recorded_for_track
+      #   description: "The maximum speed of vehicles in the track"
+      #   tests:
+      #     - not_null
+      - name: avg_speed_recorded_for_track
+        description: "The average speed of vehicles in the track"
+        tests:
+          - not_null

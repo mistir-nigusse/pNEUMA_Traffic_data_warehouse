@@ -19,6 +19,7 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__SCHEDULER_ZOMBIE_TASK_THRESHOLD: 20
+    
 
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
@@ -39,6 +40,10 @@ x-airflow-common:
     - /Users/missy/Desktop/python/Traffic_data_week_2/utils:/opt/airflow/utils
     - /Users/missy/Desktop/python/Traffic_data_week_2/data:/opt/airflow/data
     - /Users/missy/Desktop/python/Traffic_data_week_2/plugins:/opt/airflow/plugins
+    - /Users/missy/Desktop/python/Traffic_data_week_2/dbt:/opt/airflow/dbt
+    - /Users/missy/Desktop/python/Traffic_data_week_2/dbt/models:/opt/airflow/dbt/models
+    
+
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -129,6 +134,7 @@ services:
       # Required to handle warm shutdown of the celery workers properly
       # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
       DUMB_INIT_SETSID: "0"
+      DBT_MODELS_DIR: /Users/missy/Desktop/python/Traffic_data_week_2/dbt/models
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
@@ -248,6 +254,26 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+  # dbt:
+  #   image: ghcr.io/dbt-labs/dbt-core:latest
+  #   command: ["dbt" , "--version"]
+  #   volumes:
+  #     - /Users/missy/Desktop/python/Traffic_data_week_2/dbt:/dbt
+  #   depends_on:
+  #     - postgres
+
+  # redash:
+  #   image: redash/redash
+  #   ports:
+  #     - "5002:5002"
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     REDASH_DATABASE_URL: postgresql+psycopg2://postgres:hello@localhost:5434/Traffic
+  #   volumes:
+  #     - redash-data:/opt/redash
+
+
 
 volumes:
   postgres-db-volume:
