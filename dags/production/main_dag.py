@@ -10,8 +10,11 @@ if rpath not in sys.path:
 
 from production.extract_data import _extract_data_from_csv
 from production.load_data import _load_data_to_db
+from production.dbt_transformation import _perform_dbt_transformation
 
+from dags.config import config
 
+dir = config.dir
 
 default_args = {
     'owner': 'airflow',
@@ -19,7 +22,6 @@ default_args = {
     'email_on_retry': False,
 
 }
-
 
 with DAG(
     'ELTDag',
@@ -43,5 +45,10 @@ with DAG(
         provide_context=True,
         python_callable=_load_data_to_db
         )
+    
+    task3 = BashOperator(
+        task_id='perform_dbt_transformation',
+        bash_command=f'cd {dir} && dbt run'
+    )
 
-    task1 >>task2
+    task1 >>task2 >> task3
