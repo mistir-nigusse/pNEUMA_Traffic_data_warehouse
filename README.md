@@ -3,7 +3,7 @@
 This project is aimed at creating a scalable data warehouse to manage vehicle trajectory data collected by swarm UAVs and static roadside cameras. The data will be used by the city's traffic department to improve traffic flow and support other undisclosed projects.
 
 ## Folder Structure
-
+```bash
 TRAFFIC_DATA_WEEK_2
 │
 ├── config
@@ -33,7 +33,7 @@ TRAFFIC_DATA_WEEK_2
 ├── LICENSE
 │
 └── Screenshots
-
+```
 ## Description
 
 - **config:** Contains configuration files.
